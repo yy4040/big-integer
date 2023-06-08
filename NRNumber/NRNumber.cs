@@ -88,6 +88,8 @@ namespace Norify
 
         public string ToString(string format, IFormatProvider formatProvider)
         {
+            if ("e".Equals(format))
+                return ToStringE();
             return ToString();
         }
 
@@ -144,6 +146,40 @@ namespace Norify
                 
                 return builder.ToString();
             }
+        }
+
+        private string ToStringE()
+        {
+            var builder = InternalStatic.Sb;
+            
+            builder.Clear();
+
+            var first = true;
+            var t = Math.Abs(_mantissa);
+            var sign = t != _mantissa ? -1 : 1;
+            var additionalExp = 0;
+            
+            while (t >= 10)
+            {
+                var r = t % 10;
+                if (!first || r != 0)
+                {
+                    first = false;
+                    builder.Insert(0, r);
+                }
+                t /= 10;
+                ++additionalExp;
+            }
+            
+            if (!first)
+                builder.Insert(0, '.');
+            
+            builder.Insert(0, t * sign);
+
+            if (_exponent + additionalExp != 0)
+                builder.Append('e').Append(_exponent + additionalExp);
+
+            return builder.ToString();
         }
 
         public static NRNumber FromFloat(float value)
@@ -265,7 +301,7 @@ namespace Norify
             private const int _doubleExpMax = 308;
 
             //The smallest exponent that can appear in a Double, though not all mantissas are valid here.
-            private const int _doubleExpMin = -308;
+            private const int _doubleExpMin = -324;
             
             private static double[] Powers { get; } = new double[_doubleExpMax - _doubleExpMin + 1];
 

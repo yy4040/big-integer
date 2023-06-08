@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Norify
 {
     public class Tests
@@ -17,6 +19,20 @@ namespace Norify
             Assert.That(NRNumber.FromInt(-1987654321).ToString(), Is.EqualTo("-1987654320"));
             
             Assert.That(NRNumber.FromInt(2000000007).ToString(), Is.EqualTo("2000000000"));
+        }
+
+        [Test]
+        public void TestToStringE()
+        {
+            Assert.That(new NRNumber(1, -2147483639).ToString("e", CultureInfo.InvariantCulture), Is.EqualTo("1e-2147483639"));
+            
+            Assert.That(new NRNumber(1, 2147483638).ToString("e", CultureInfo.InvariantCulture), Is.EqualTo("1e2147483638"));
+            
+            Assert.That(NRNumber.FromFloat(3.141592f).ToString("e", CultureInfo.InvariantCulture), Is.EqualTo("3.141592"));
+            
+            Assert.That(NRNumber.FromFloat(7e8f).ToString("e", CultureInfo.InvariantCulture), Is.EqualTo("7e8"));
+            
+            Assert.That(NRNumber.FromFloat(123e-10f).ToString("e", CultureInfo.InvariantCulture), Is.EqualTo("1.23e-8"));
         }
 
         [Test]
