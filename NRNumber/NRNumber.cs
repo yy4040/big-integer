@@ -26,6 +26,10 @@ namespace Norify
             _exponent = other._exponent;
         }
 
+        public bool IsZero => _mantissa == 0;
+
+        public bool IsNotZero => _mantissa != 0;
+
         public int CompareTo(NRNumber other)
         {
             if (_mantissa == 0 || other._mantissa == 0 || _exponent == other._exponent)
