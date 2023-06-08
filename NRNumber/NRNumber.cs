@@ -186,6 +186,26 @@ namespace Norify
             return builder.ToString();
         }
 
+        /// <summary>
+        /// Is is unsafe.
+        /// </summary>
+        /// <returns>
+        /// Returns float.Max if this is greater than or equal to 1e38.
+        /// Returns float.Min if this is less than or equal to -1e38.
+        /// Others return float value
+        /// </returns>
+        public float ToFloat()
+        {
+            if (_mantissa == 0)
+                return 0f;
+            
+            var additionalExp = (int)Math.Floor(Math.Log10(Math.Abs(_mantissa)));
+            if (_exponent + additionalExp >= 38)
+                return _mantissa > 0 ? float.MaxValue : float.MinValue;
+
+            return (float)(_mantissa * PowersOf10.Lookup(_exponent));
+        }
+
         public static NRNumber FromFloat(float value)
         {
             if (!float.IsFinite(value))

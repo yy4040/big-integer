@@ -52,6 +52,22 @@ namespace Norify
         }
 
         [Test]
+        public void TestToFloat()
+        {
+            Assert.That(NRNumber.FromFloat(3.141592f).ToFloat(), Is.EqualTo(3.141592f));
+            
+            Assert.That(new NRNumber(1234567, -5).ToFloat(), Is.EqualTo(12.34567f));
+            
+            Assert.That(new NRNumber(5, 37).ToFloat(), Is.EqualTo(5e37f));
+            
+            Assert.That(new NRNumber(5, 38).ToFloat(), Is.EqualTo(float.MaxValue));
+            
+            Assert.That(new NRNumber(-5, 37).ToFloat(), Is.EqualTo(-5e37f));
+            
+            Assert.That(new NRNumber(-5, 38).ToFloat(), Is.EqualTo(float.MinValue));
+        }
+
+        [Test]
         public void TestEqualsNRNumbers()
         {
             Assert.That(new NRNumber(50000, 0), Is.EqualTo(new NRNumber(500, 2)));
