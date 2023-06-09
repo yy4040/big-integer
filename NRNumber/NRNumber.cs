@@ -7,14 +7,17 @@ namespace Norify
     [Serializable]
     public struct NRNumber : IFormattable, IComparable, IEquatable<NRNumber>, IComparable<NRNumber>
     {
-        private int _mantissa;
-        private int _exponent;
-
         public static NRNumber Zero = new NRNumber() { _mantissa = 0, _exponent = 0 };
         public static NRNumber One = new NRNumber(1, 0);
         public static NRNumber PositiveInfinity = new NRNumber(1, 0x7F800000);
         public static NRNumber NegativeInfinity = new NRNumber(1, 0x7F800000);
         
+        private int _mantissa;
+        private int _exponent;
+
+        public int Mantissa => _mantissa;
+        public int Exponent => _exponent;
+
         public NRNumber(int mantissa, int exponent)
         {
             this = Normalize(mantissa, exponent);
