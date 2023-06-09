@@ -20,7 +20,7 @@ namespace Norify
             
             Assert.That(NRNumber.FromInt(2000000007).ToString(), Is.EqualTo("2000000000"));
         }
-
+        
         [Test]
         public void TestToStringE()
         {
@@ -65,6 +65,35 @@ namespace Norify
             Assert.That(new NRNumber(-5, 37).ToFloat(), Is.EqualTo(-5e37f));
             
             Assert.That(new NRNumber(-5, 38).ToFloat(), Is.EqualTo(float.MinValue));
+        }
+        
+        [Test]
+        public void TestFromDoubleToString()
+        {
+            Assert.That(NRNumber.FromDouble(3.14).ToString(), Is.EqualTo("3.14"));
+            
+            Assert.That(NRNumber.FromDouble(-123.456).ToString(), Is.EqualTo("-123.456"));
+            
+            Assert.That(NRNumber.FromDouble(7e8).ToString(), Is.EqualTo("700000000"));
+            
+            Assert.That(NRNumber.FromDouble(123e-10).ToString(), Is.EqualTo("0.0000000123"));
+            
+            Assert.That(NRNumber.FromDouble(4e20).ToString(), Is.EqualTo("400000000000000000000"));
+            
+            Assert.That(NRNumber.FromDouble(12345.12345).ToString(), Is.EqualTo("12345.1234"));
+        }
+        
+        [Test]
+        public void TestFromString()
+        {
+            Assert.That(NRNumber.FromString("+3"), Is.EqualTo(NRNumber.FromDouble(3)));
+            Assert.That(NRNumber.FromString("3.2e23"), Is.EqualTo(NRNumber.FromDouble(3.2e23)));
+            Assert.That(NRNumber.FromString("-4.70e+9"), Is.EqualTo(NRNumber.FromDouble(-4.70e+9)));
+            Assert.That(NRNumber.FromString("-0.2E-123"), Is.EqualTo(NRNumber.FromDouble(-0.2E-123)));
+            Assert.That(NRNumber.FromString("-7.660333441"), Is.EqualTo(NRNumber.FromDouble(-7.660333441)));
+            Assert.That(NRNumber.FromString("+0003"), Is.EqualTo(NRNumber.FromDouble(+0003)));
+            Assert.That(NRNumber.FromString("37.e88"), Is.EqualTo(new NRNumber(37, 88)));
+            Assert.That(NRNumber.FromString("123a"), Is.EqualTo(NRNumber.Zero));
         }
 
         [Test]

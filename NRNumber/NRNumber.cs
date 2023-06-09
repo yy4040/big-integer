@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Norify
 {
@@ -227,9 +228,48 @@ namespace Norify
             
             return Normalize(mantissa, exponent);
         }
+        
+        public static NRNumber FromDouble(double value)
+        {
+            if (!double.IsFinite(value))
+            {
+                var bits = BitConverter.DoubleToInt64Bits(value);
+                return new NRNumber(bits > 0 ? 1 : -1, (int)((bits >> 32) & 0x7FFFFFFF));
+            }
+
+            if (Math.Abs(value) < float.Epsilon)
+            {
+                return Zero;
+            }
+
+            var exponent = (int)Math.Floor(Math.Log10(Math.Abs(value))) - 8;
+            var mantissa = (int)Math.Round(value * PowersOf10.Lookup(-exponent));
+            
+            return Normalize(mantissa, exponent);
+        }
 
         public static NRNumber FromInt(int value)
             => Normalize(value, 0);
+        
+        private const string _notationPattern = @"(^[+\-]?(?:0|[1-9]\d*)(?:\.\d+)?)(?:[eE]([+\-]?\d+))?$";
+        public static NRNumber FromString(string s)
+        {
+            var match = Regex.Match(s, _notationPattern);
+            if (match.Success)
+            {
+                var captures = match.Captures;
+                var mantissa = double.Parse(captures[0].Value);
+                var exponent = captures.Count < 3 ? 0 : int.Parse(captures[1].Value);
+                
+                var temp = FromDouble(mantissa);
+                return new NRNumber(temp._mantissa, temp._exponent + exponent);
+            }
+
+            if (double.TryParse(s, out var d))
+                return FromDouble(d);
+            
+            return Zero;
+        }
 
         private const int _normalizeMin = 100000000;
         private const int _normalizeMax = 1000000000;
