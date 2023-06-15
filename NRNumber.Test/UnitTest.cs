@@ -5,7 +5,15 @@ namespace Norify
     public class Tests
     {
         [SetUp]
-        public void Setup() { }
+        public void Setup()
+        {
+            NRNumber.CustomToString = (number, format, _) =>
+            {
+                if (format.Equals("e", StringComparison.InvariantCultureIgnoreCase))
+                    return number.ToStringE();
+                return null;
+            };
+        }
 
         [Test]
         public void TestFromIntToString()
@@ -48,7 +56,7 @@ namespace Norify
             
             Assert.That(NRNumber.FromFloat(4e20f).ToString(), Is.EqualTo("400000000000000000000"));
             
-            Assert.That(NRNumber.FromFloat(12345.12345f).ToString(), Is.EqualTo("12345.12"));
+            Assert.That(NRNumber.FromFloat(12345.12345f).ToString("zz", CultureInfo.InvariantCulture), Is.EqualTo("12345.12"));
         }
 
         [Test]

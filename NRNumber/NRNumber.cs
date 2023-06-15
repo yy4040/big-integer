@@ -13,6 +13,8 @@ namespace Norify
         public static NRNumber PositiveInfinity = new NRNumber(1, 0x7F800000);
         public static NRNumber NegativeInfinity = new NRNumber(1, 0x7F800000);
         
+        public static Func<NRNumber, string, IFormatProvider, string?>? CustomToString;
+        
         private int _mantissa;
         private int _exponent;
 
@@ -96,8 +98,12 @@ namespace Norify
 
         public string ToString(string format, IFormatProvider formatProvider)
         {
-            if ("e".Equals(format))
-                return ToStringE();
+            if (CustomToString != null)
+            {
+                var ret = CustomToString.Invoke(this, format, formatProvider);
+                if (ret != null)
+                    return ret;
+            }
             return ToString();
         }
 
@@ -156,7 +162,7 @@ namespace Norify
             }
         }
 
-        private string ToStringE()
+        public string ToStringE()
         {
             var builder = InternalStatic.Sb;
             
