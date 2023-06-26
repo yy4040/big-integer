@@ -370,6 +370,9 @@ namespace Norify
         public static NRNumber Min(NRNumber l, NRNumber r)
             => l.CompareTo(r) < 0 ? l : r;
         
+        public static NRNumber Lerp(NRNumber a, NRNumber b, float t)
+            => a + (b - a) * Math.Clamp(t, 0f, 1f);
+
         private static class PowersOf10
         {
             //the largest exponent that can appear in a Double, though not all mantissas are valid here.
