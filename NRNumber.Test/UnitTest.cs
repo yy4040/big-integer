@@ -9,7 +9,7 @@ namespace Norify
         {
             NRNumber.CustomToString = (number, format, _) =>
             {
-                if (format.Equals("e", StringComparison.InvariantCultureIgnoreCase))
+                if ("e".Equals(format, StringComparison.InvariantCultureIgnoreCase))
                     return number.ToStringE();
                 return null;
             };
@@ -204,6 +204,48 @@ namespace Norify
             Assert.That(new NRNumber(7574, 12) > new NRNumber(-3, 450), Is.True);
             
             Assert.That(new NRNumber(7574, 12) > new NRNumber(3, -450), Is.True);
+        }
+
+        [Test]
+        public void TestFloor()
+        {
+            {
+                var testValue = NRNumber.FromString("9.87654321");
+
+                Assert.Throws<ArgumentOutOfRangeException>(() => NRNumber.Floor(testValue, -1));
+
+                Assert.That(NRNumber.Floor(testValue, 0), Is.EqualTo(NRNumber.FromString("9.00000000")));
+                Assert.That(NRNumber.Floor(testValue, 1), Is.EqualTo(NRNumber.FromString("9.80000000")));
+                Assert.That(NRNumber.Floor(testValue, 2), Is.EqualTo(NRNumber.FromString("9.87000000")));
+                Assert.That(NRNumber.Floor(testValue, 3), Is.EqualTo(NRNumber.FromString("9.87600000")));
+                Assert.That(NRNumber.Floor(testValue, 4), Is.EqualTo(NRNumber.FromString("9.87650000")));
+                Assert.That(NRNumber.Floor(testValue, 5), Is.EqualTo(NRNumber.FromString("9.87654000")));
+                Assert.That(NRNumber.Floor(testValue, 6), Is.EqualTo(NRNumber.FromString("9.87654300")));
+                Assert.That(NRNumber.Floor(testValue, 7), Is.EqualTo(NRNumber.FromString("9.87654320")));
+                Assert.That(NRNumber.Floor(testValue, 8), Is.EqualTo(NRNumber.FromString("9.87654321")));
+                Assert.That(NRNumber.Floor(testValue, 9), Is.EqualTo(NRNumber.FromString("9.87654321")));
+            }
+            
+            {
+                var testValue = NRNumber.FromString("-123456.789");
+
+                Assert.That(NRNumber.Floor(testValue, 0), Is.EqualTo(NRNumber.FromString("-123456.000")));
+                Assert.That(NRNumber.Floor(testValue, 1), Is.EqualTo(NRNumber.FromString("-123456.700")));
+                Assert.That(NRNumber.Floor(testValue, 2), Is.EqualTo(NRNumber.FromString("-123456.780")));
+                Assert.That(NRNumber.Floor(testValue, 3), Is.EqualTo(NRNumber.FromString("-123456.789")));
+                Assert.That(NRNumber.Floor(testValue, 4), Is.EqualTo(NRNumber.FromString("-123456.789")));
+            }
+            
+            {
+                var testValue = NRNumber.FromString("123e-20");
+
+                Assert.That(NRNumber.Floor(testValue, 17), Is.EqualTo(NRNumber.FromString("0e-20")));
+                Assert.That(NRNumber.Floor(testValue, 18), Is.EqualTo(NRNumber.FromString("100e-20")));
+                Assert.That(NRNumber.Floor(testValue, 19), Is.EqualTo(NRNumber.FromString("120e-20")));
+                Assert.That(NRNumber.Floor(testValue, 20), Is.EqualTo(NRNumber.FromString("123e-20")));
+            }
+            
+            Assert.That(NRNumber.Floor(new NRNumber(777, 100)), Is.EqualTo(NRNumber.FromString("777e100")));
         }
     }
 }

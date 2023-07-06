@@ -215,7 +215,7 @@ namespace Norify
             if (_exponent + additionalExp >= 38)
                 return _mantissa > 0 ? float.MaxValue : float.MinValue;
 
-            return (float)(_mantissa * PowersOf10.Lookup(_exponent));
+            return (float)(_mantissa * PowersOf10.LookupD(_exponent));
         }
 
         public static NRNumber FromFloat(float value)
@@ -232,7 +232,7 @@ namespace Norify
             }
 
             var exponent = (int)Math.Floor(Math.Log10(Math.Abs(value))) - 6;
-            var mantissa = (int)Math.Round(value * PowersOf10.Lookup(-exponent));
+            var mantissa = (int)Math.Round(value * PowersOf10.LookupD(-exponent));
             
             return Normalize(mantissa, exponent);
         }
@@ -251,7 +251,7 @@ namespace Norify
             }
 
             var exponent = (int)Math.Floor(Math.Log10(Math.Abs(value))) - 8;
-            var mantissa = (int)Math.Round(value * PowersOf10.Lookup(-exponent));
+            var mantissa = (int)Math.Round(value * PowersOf10.LookupD(-exponent));
             
             return Normalize(mantissa, exponent);
         }
@@ -279,8 +279,9 @@ namespace Norify
             return Zero;
         }
 
-        private const int _normalizeMin = 100000000;
-        private const int _normalizeMax = 1000000000;
+        private const int _normalizedMantissaMin = 100000000;
+        private const int _normalizedMantissaMax = 1000000000;
+        private const int _normalizedExponentBase = -8;
         public static NRNumber Normalize(long mantissa, int exponent)
         {
             if (mantissa == 0)
@@ -290,13 +291,13 @@ namespace Norify
             var sign = newMantissa != mantissa ? -1 : 1;
             var additionalExp = 0;
             
-            while (newMantissa < _normalizeMin)
+            while (newMantissa < _normalizedMantissaMin)
             {
                 newMantissa *= 10;
                 ++additionalExp;
             }
 
-            while (newMantissa >= _normalizeMax)
+            while (newMantissa >= _normalizedMantissaMax)
             {
                 newMantissa /= 10;
                 --additionalExp;
@@ -327,7 +328,7 @@ namespace Norify
             var diffExp = a._exponent - b._exponent;
             if (diffExp >= 9) return a;
 
-            var la = a._mantissa * (long)PowersOf10.Lookup(diffExp);
+            var la = a._mantissa * (long)PowersOf10.LookupD(diffExp);
 
             return Normalize(la + b._mantissa, b._exponent);
         }
@@ -338,7 +339,7 @@ namespace Norify
             => Normalize((long)a._mantissa * b._mantissa, a._exponent + b._exponent);
 
         public static NRNumber operator /(NRNumber a, NRNumber b)
-            => Normalize((long)a._mantissa * _normalizeMax / b._mantissa, a._exponent - 9 - b._exponent);
+            => Normalize((long)a._mantissa * _normalizedMantissaMax / b._mantissa, a._exponent - 9 - b._exponent);
 
         public static NRNumber operator ++(NRNumber value)
             => value + 1;
@@ -373,6 +374,31 @@ namespace Norify
         public static NRNumber Lerp(NRNumber a, NRNumber b, float t)
             => a + (b - a) * Math.Clamp(t, 0f, 1f);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NRNumber Floor(NRNumber value)
+            => Floor(value, 0);
+
+        private const int _maxDigits = -_normalizedExponentBase;
+        public static NRNumber Floor(NRNumber value, int digits)
+        {
+            if (digits < 0)
+                throw new ArgumentOutOfRangeException(nameof(digits));
+
+            var exponent = value._exponent - _normalizedExponentBase;
+            var power = _maxDigits - exponent - digits;
+            
+            if (power > _maxDigits)
+                return Zero;
+            
+            if (power <= 0)
+                return value;
+            
+            var power10 = PowersOf10.LookupI(power);
+            value._mantissa /= power10;
+            value._mantissa *= power10;
+            return value;
+        }
+
         private static class PowersOf10
         {
             //the largest exponent that can appear in a Double, though not all mantissas are valid here.
@@ -381,22 +407,24 @@ namespace Norify
             //The smallest exponent that can appear in a Double, though not all mantissas are valid here.
             private const int _doubleExpMin = -324;
             
-            private static double[] Powers { get; } = new double[_doubleExpMax - _doubleExpMin + 1];
+            private static readonly double[] _dPowers = new double[_doubleExpMax - _doubleExpMin + 1];
+            private static readonly int[] _iPowers = new int[10];
 
             private const int _indexOf0 = -_doubleExpMin;
 
             static PowersOf10()
             {
-                for (var i = 0; i < Powers.Length; ++i)
-                {
-                    Powers[i] = double.Parse("1e" + (i - _indexOf0), CultureInfo.InvariantCulture);
-                }
+                for (var i = 0; i < _dPowers.Length; ++i)
+                    _dPowers[i] = double.Parse("1e" + (i - _indexOf0), CultureInfo.InvariantCulture);
+
+                _iPowers[0] = 1;
+                for (var i = 1; i < _iPowers.Length; ++i)
+                    _iPowers[i] = _iPowers[i - 1] * 10;
             }
 
-            public static double Lookup(int power)
-            {
-                return Powers[_indexOf0 + power];
-            }
+            public static double LookupD(int power) => _dPowers[_indexOf0 + power];
+            
+            public static int LookupI(int power) => _iPowers[power];
         }
     }
 }
