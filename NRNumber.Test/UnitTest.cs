@@ -132,6 +132,12 @@ namespace Norify
             Assert.That(NRNumber.FromFloat(5e9f) + NRNumber.FromFloat(1f), Is.EqualTo(NRNumber.FromFloat(5e9f)));
             
             Assert.That(NRNumber.FromFloat(5e8f) + NRNumber.FromFloat(1f), Is.EqualTo(NRNumber.FromInt(500000001)));
+            
+            Assert.That(NRNumber.FromInt(0) + NRNumber.FromFloat(0.5f), Is.EqualTo(new NRNumber(5, -1)));
+            
+            Assert.That(NRNumber.Zero + NRNumber.One, Is.EqualTo(NRNumber.One));
+            
+            Assert.That(NRNumber.Zero + NRNumber.FromFloat(0.5f), Is.EqualTo(NRNumber.FromString("0.5")));
         }
 
         [Test]
@@ -148,6 +154,12 @@ namespace Norify
             Assert.That(new NRNumber(123456789, -30) - new NRNumber(5, -30), Is.EqualTo(new NRNumber(123456784, -30)));
             
             Assert.That(new NRNumber(123456789, -29) - new NRNumber(5, -30), Is.EqualTo(new NRNumber(123456789, -29)));
+            
+            Assert.That(NRNumber.FromInt(0) - NRNumber.FromFloat(0.5f), Is.EqualTo(new NRNumber(-5, -1)));
+            
+            Assert.That(NRNumber.Zero - NRNumber.One, Is.EqualTo(NRNumber.FromInt(-1)));
+            
+            Assert.That(NRNumber.Zero - NRNumber.FromFloat(0.5f), Is.EqualTo(NRNumber.FromString("-0.5")));
         }
 
         [Test]
@@ -158,6 +170,10 @@ namespace Norify
             Assert.That(NRNumber.FromFloat(-333.2222f) * -3e10f, Is.EqualTo(NRNumber.FromFloat(9.996666e12f)));
             
             Assert.That(NRNumber.FromInt(50000) * 0.2f, Is.EqualTo(NRNumber.FromInt(10000)));
+            
+            Assert.That(NRNumber.FromInt(123456789) * NRNumber.Zero, Is.EqualTo((NRNumber)0));
+            
+            Assert.That(NRNumber.FromInt(123456789) * NRNumber.One, Is.EqualTo(NRNumber.FromString("123456789")));
         }
 
         [Test]
